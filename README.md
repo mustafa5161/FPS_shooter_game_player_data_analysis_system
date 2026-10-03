@@ -1,2 +1,3 @@
 # FPS_shooter_game_player_data_analysis_system
-
+Fikrim oyuncudan ve oyundan toplanan verilerle anomali oyuncuları tespit edip izlenmesi için bildirmek. Birnevi anticheat.
+Tablolar için örnek vermek gerekirse; oyun içi ekonomi,pc verileri (hassasiyet,hz vb.),ağ verileri (packetloss vb.),oyuncu verileri (oyuncunun sunucuya gönderdiği tuş istekleri),sunucu verileri.Tasarıyı daha tam kurmadım kurunca tablo sayısı daha da artacaktır.
