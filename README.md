@@ -31,19 +31,57 @@ EXEC sp_LogCheatEvent
 SELECT username, trust_factor, is_banned, ban_reason FROM Players;
 SELECT * FROM Ban_History;
 
-## Veritabanı İlişki Şeması (ER Diagram)
+## Veritabanı ilişkilerini görsel olarak incelemek mermaid.live aşağıdaki kodu baştaki 3 tırnak harici yapıştırın:
 
-Aşağıdaki şemada projemizin tüm tabloları, sütunları ve aralarındaki ilişkiler gösterilmektedir:
-
-```mermaid
+'''
 erDiagram
     Players {
         int player_id PK
         nvarchar username
         nvarchar hwid
         varchar ip_address
+        datetime2 account_created
         int trust_factor
         bit is_banned
+        datetime2 ban_date
+        nvarchar ban_reason
+    }
+
+    AC_Blacklisted_Signatures {
+        int signature_id PK
+        varchar threat_type
+        varchar identifier_value
+        datetime2 added_date
+        int risk_level
+    }
+
+    Ban_History {
+        int ban_id PK
+        int player_id FK
+        varchar ban_type
+        nvarchar reason
+        varchar issued_by
+        datetime2 start_date
+        datetime2 end_date
+        bit is_active
+    }
+
+    Manual_Review_Cases {
+        int case_id PK
+        int suspect_player_id FK
+        int reviewer_id
+        varchar case_status
+        varchar verdict
+        datetime2 created_at
+        datetime2 resolved_at
+    }
+
+    Matches {
+        int match_id PK
+        nvarchar map_name
+        varchar server_region
+        datetime2 start_time
+        int duration_seconds
     }
 
     Player_Hardware_Logs {
@@ -51,19 +89,17 @@ erDiagram
         int player_id FK
         nvarchar cpu_serial
         nvarchar motherboard_serial
+        varchar mac_address
+        datetime2 login_time
     }
 
     Player_Sessions {
         bigint session_id PK
         int player_id FK
         varchar ip_address
+        varchar country_code
         bit vpn_detected
-    }
-
-    Matches {
-        int match_id PK
-        nvarchar map_name
-        varchar server_region
+        datetime2 login_time
     }
 
     Player_Match_Stats {
@@ -72,6 +108,12 @@ erDiagram
         int player_id FK
         int kills
         int headshots
+        float distance_traveled
+        float average_time_to_kill
+        float sensitivity
+        int fov
+        int resolution_x
+        int resolution_y
     }
 
     Combat_Kill_Events {
@@ -80,6 +122,8 @@ erDiagram
         int attacker_id
         int victim_id
         varchar hitbox_area
+        float distance_meters
+        int event_time_in_match
     }
 
     Player_Reports {
@@ -87,12 +131,8 @@ erDiagram
         int reporter_id FK
         int reported_id FK
         int match_id FK
-    }
-
-    Manual_Review_Cases {
-        int case_id PK
-        int suspect_player_id FK
-        varchar case_status
+        report_reason NVARCHAR
+        datetime2 report_time
     }
 
     AntiCheat_Logs {
@@ -101,38 +141,28 @@ erDiagram
         int match_id FK
         varchar cheat_category
         varchar cheat_type
+        nvarchar event_details
         int severity_level
-    }
-
-    AC_Blacklisted_Signatures {
-        int signature_id PK
-        varchar threat_type
-        varchar identifier_value
-    }
-
-    Ban_History {
-        int ban_id PK
-        int player_id FK
-        varchar ban_type
-        nvarchar reason
+        datetime2 client_timestamp
     }
 
     Cheat_Risk_Rules {
         int rule_id PK
-        varchar cheat_type
+        varchar cheat_type UK
         int assigned_severity
+        nvarchar description
     }
 
-    Players ||--o{ Player_Hardware_Logs : "has"
-    Players ||--o{ Player_Sessions : "has"
-    Players ||--o{ Player_Match_Stats : "plays"
-    Players ||--o{ Combat_Kill_Events : "attacker"
-    Players ||--o{ Player_Reports : "reports"
-    Players ||--o{ Manual_Review_Cases : "suspect"
-    Players ||--o{ AntiCheat_Logs : "generates"
-    Players ||--o{ Ban_History : "receives"
-
-    Matches ||--o{ Player_Match_Stats : "contains"
-    Matches ||--o{ Combat_Kill_Events : "records"
-    Matches ||--o{ Player_Reports : "includes"
-    Matches ||--o{ AntiCheat_Logs : "occurs_in"
+    %% İlişkiler (Foreign Key Bağlantıları)
+    Players ||--o{ Ban_History : "sahiptir"
+    Players ||--o{ Manual_Review_Cases : "incelenir"
+    Players ||--o{ Player_Hardware_Logs : "kaydeder"
+    Players ||--o{ Player_Sessions : "oturumu_aclar"
+    Players ||--o{ Player_Match_Stats : "oynar"
+    Matches ||--o{ Player_Match_Stats : "kapsar"
+    Matches ||--o{ Combat_Kill_Events : "icerir"
+    Matches ||--o{ Player_Reports : "raporlanir"
+    Players ||--o{ Player_Reports : "eder (reporter)"
+    Players ||--o{ Player_Reports : "edilir (reported)"
+    Players ||--o{ AntiCheat_Logs : "uretir"
+    Matches ||--o{ AntiCheat_Logs : "kaydedilir"
