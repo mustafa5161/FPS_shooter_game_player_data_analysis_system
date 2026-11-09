@@ -30,3 +30,20 @@ EXEC sp_LogCheatEvent
 -- 3. Sonucu kontrol et
 SELECT username, trust_factor, is_banned, ban_reason FROM Players;
 SELECT * FROM Ban_History;
+
+erDiagram
+    Players ||--o{ Player_Hardware_Logs : has
+    Players ||--o{ Player_Sessions : has
+    Players ||--o{ Player_Match_Stats : plays
+    Players ||--o{ Combat_Kill_Events : performs
+    Players ||--o{ Player_Reports : submits_receives
+    Players ||--o{ Manual_Review_Cases : evaluated_in
+    Players ||--o{ AntiCheat_Logs : generates
+    Players ||--o{ Ban_History : receives
+
+    Matches ||--o{ Player_Match_Stats : contains
+    Matches ||--o{ Combat_Kill_Events : records
+    Matches ||--o{ Player_Reports : logs
+    Matches ||--o{ AntiCheat_Logs : tracks
+
+    Cheat_Risk_Rules ||--o{ AntiCheat_Logs : defines_severity
